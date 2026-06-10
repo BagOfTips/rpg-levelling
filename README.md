@@ -1,6 +1,7 @@
 # RPG Levelling
 
 A small Obsidian plugin that adds RPG-style levelling progress to the active editor pane.
+This is a "vibe-coded" project.
 
 ![Alt Text](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGl5emZybG83YTN0dzlwcTNubm0xM3dtMHNpb3RydmV2b3p0aDc1YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5ZnJhpJiu1foUfBlo1/giphy.gif)
 
@@ -16,5 +17,4 @@ A small Obsidian plugin that adds RPG-style levelling progress to the active edi
 
 ## Commands
 
-- `Show RPG levelling progress`
-- `Reset RPG levelling progress`
+- `Toggle RPG levelling progress display`
