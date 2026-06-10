@@ -1,7 +1,7 @@
 {
   "id": "rpg-levelling",
   "name": "RPG Levelling",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.5.0",
   "description": "Gain XP as you type, level up forever, and track progress with a small RPG-style overlay.",
   "author": "Bag of Tips",

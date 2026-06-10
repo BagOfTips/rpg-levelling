@@ -35,7 +35,7 @@ module.exports = class RpgLevellingPlugin extends Plugin {
       {},
       DEFAULT_DATA,
       { lastKnownLengths: {} },
-      await this.loadSavedProgress()
+      await this.loadData()
     );
     this.data.lastKnownLengths = this.data.lastKnownLengths || {};
     this.data.widgetPosition = this.getValidWidgetPosition(
@@ -108,49 +108,7 @@ module.exports = class RpgLevellingPlugin extends Plugin {
     if (this.hud) {
       this.hud.remove();
     }
-    this.saveProgress();
-  }
-
-  async loadSavedProgress() {
-    const pluginData = await this.loadData();
-    const backupData = this.loadBackupProgress();
-
-    if (this.hasProgress(pluginData)) {
-      return pluginData;
-    }
-
-    if (this.hasProgress(backupData)) {
-      await this.saveData(backupData);
-      return backupData;
-    }
-
-    return pluginData || backupData || {};
-  }
-
-  loadBackupProgress() {
-    try {
-      const saved = window.localStorage.getItem(this.getBackupKey());
-      return saved ? JSON.parse(saved) : null;
-    } catch (error) {
-      console.warn("RPG Levelling could not load backup progress.", error);
-      return null;
-    }
-  }
-
-  hasProgress(data) {
-    return (
-      data &&
-      (Number(data.level) > 1 ||
-        Number(data.xp) > 0 ||
-        Number(data.typedCharacters) > 0)
-    );
-  }
-
-  getBackupKey() {
-    const vaultName = this.app.vault.getName
-      ? this.app.vault.getName()
-      : "default-vault";
-    return `rpg-levelling:${vaultName}:progress`;
+    this.saveData(this.data);
   }
 
   createStatusBar() {
@@ -369,7 +327,7 @@ module.exports = class RpgLevellingPlugin extends Plugin {
     this.data.showPaneWidget = !this.data.showPaneWidget;
     this.moveWidgetToActivePane();
     this.updateUi();
-    await this.saveProgress();
+        await this.saveData(this.data);
 
     new Notice(
       this.data.showPaneWidget
@@ -385,7 +343,7 @@ module.exports = class RpgLevellingPlugin extends Plugin {
       showPaneWidget: Boolean(this.data.showPaneWidget),
       showStatusBarProgress: Boolean(this.data.showStatusBarProgress),
     });
-    await this.saveProgress();
+    await this.saveData(this.data);
     this.moveWidgetToActivePane();
     this.updateUi();
     new Notice("RPG levelling progress reset.");
@@ -436,18 +394,8 @@ module.exports = class RpgLevellingPlugin extends Plugin {
   queueSave() {
     window.clearTimeout(this.saveTimer);
     this.saveTimer = window.setTimeout(() => {
-      this.saveProgress();
+      this.saveData(this.data);
     }, 700);
-  }
-
-  async saveProgress() {
-    try {
-      window.localStorage.setItem(this.getBackupKey(), JSON.stringify(this.data));
-    } catch (error) {
-      console.warn("RPG Levelling could not back up progress.", error);
-    }
-
-    await this.saveData(this.data);
   }
 };
 
@@ -479,7 +427,7 @@ class RpgLevellingSettingTab extends PluginSettingTab {
             this.plugin.data.widgetPosition =
               this.plugin.getValidWidgetPosition(value);
             this.plugin.applyWidgetPosition();
-            await this.plugin.saveProgress();
+            await this.plugin.saveData(this.plugin.data);
           });
       });
 
@@ -493,7 +441,7 @@ class RpgLevellingSettingTab extends PluginSettingTab {
             this.plugin.data.showPaneWidget = value;
             this.plugin.moveWidgetToActivePane();
             this.plugin.updateUi();
-            await this.plugin.saveProgress();
+            await this.plugin.saveData(this.plugin.data);
           });
       });
 
@@ -506,7 +454,7 @@ class RpgLevellingSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.data.showStatusBarProgress = value;
             this.plugin.updateUi();
-            await this.plugin.saveProgress();
+            await this.plugin.saveData(this.plugin.data);
           });
       });
 
