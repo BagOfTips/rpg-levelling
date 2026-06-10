@@ -1,4 +1,4 @@
-const { Notice, Plugin, PluginSettingTab, Setting } = require("obsidian");
+const { Modal, Notice, Plugin, PluginSettingTab, Setting } = require("obsidian");
 
 const DEFAULT_DATA = {
   level: 1,
@@ -6,6 +6,8 @@ const DEFAULT_DATA = {
   typedCharacters: 0,
   lastKnownLengths: {},
   widgetPosition: "bottom-right",
+  showPaneWidget: true,
+  showStatusBarProgress: false,
 };
 
 const WIDGET_POSITIONS = [
@@ -39,6 +41,15 @@ module.exports = class RpgLevellingPlugin extends Plugin {
     this.data.widgetPosition = this.getValidWidgetPosition(
       this.data.widgetPosition
     );
+    if (typeof this.data.showPaneWidget !== "boolean") {
+      this.data.showPaneWidget =
+        typeof this.data.hidePaneWidget === "boolean"
+          ? !this.data.hidePaneWidget
+          : !Boolean(this.data.onlyShowLevelUpPopup);
+    }
+    this.data.showStatusBarProgress = Boolean(this.data.showStatusBarProgress);
+    delete this.data.hidePaneWidget;
+    delete this.data.onlyShowLevelUpPopup;
     this.saveTimer = null;
     this.lastAnimationTimer = null;
     this.widgetHost = null;
@@ -81,26 +92,10 @@ module.exports = class RpgLevellingPlugin extends Plugin {
     );
 
     this.addCommand({
-      id: "show-rpg-levelling-progress",
-      name: "Show RPG levelling progress",
-      callback: () => {
-        this.showProgressNotice();
-      },
-    });
-
-    this.addCommand({
-      id: "reset-rpg-levelling-progress",
-      name: "Reset RPG levelling progress",
+      id: "toggle-rpg-levelling-progress-display",
+      name: "Toggle RPG levelling progress display",
       callback: async () => {
-        this.data = Object.assign({}, DEFAULT_DATA, {
-          lastKnownLengths: {},
-          widgetPosition: this.getValidWidgetPosition(
-            this.data.widgetPosition
-          ),
-        });
-        await this.saveProgress();
-        this.updateUi();
-        new Notice("RPG levelling progress reset.");
+        await this.toggleProgressDisplay();
       },
     });
 
@@ -212,6 +207,11 @@ module.exports = class RpgLevellingPlugin extends Plugin {
       return;
     }
 
+    if (!this.data.showPaneWidget) {
+      this.hud.addClass("rpg-levelling-widget--hidden");
+      return;
+    }
+
     const leaf = this.app.workspace.activeLeaf;
     const view = leaf && leaf.view;
     const viewType = view && view.getViewType && view.getViewType();
@@ -314,6 +314,10 @@ module.exports = class RpgLevellingPlugin extends Plugin {
     const percent = Math.min(100, Math.max(0, (this.data.xp / needed) * 100));
 
     if (this.statusBar) {
+      this.statusBar.toggleClass(
+        "rpg-levelling--hidden",
+        !this.data.showStatusBarProgress
+      );
       this.levelLabel.setText(`Lv ${this.data.level}`);
       this.progressFill.style.width = `${percent}%`;
       this.progressText.setText(`${this.data.xp}/${needed}`);
@@ -324,6 +328,10 @@ module.exports = class RpgLevellingPlugin extends Plugin {
     }
 
     if (this.hud) {
+      this.hud.toggleClass(
+        "rpg-levelling-widget--hidden",
+        !this.data.showPaneWidget
+      );
       this.hudLevelLabel.setText(`Lv ${this.data.level}`);
       this.hudProgressFill.style.width = `${percent}%`;
       this.hudProgressText.setText(`${this.data.xp}/${needed} XP`);
@@ -357,22 +365,54 @@ module.exports = class RpgLevellingPlugin extends Plugin {
       : "bottom-right";
   }
 
+  async toggleProgressDisplay() {
+    this.data.showPaneWidget = !this.data.showPaneWidget;
+    this.moveWidgetToActivePane();
+    this.updateUi();
+    await this.saveProgress();
+
+    new Notice(
+      this.data.showPaneWidget
+        ? "RPG Levelling pane widget shown."
+        : "RPG Levelling pane widget hidden."
+    );
+  }
+
+  async resetProgress() {
+    this.data = Object.assign({}, DEFAULT_DATA, {
+      lastKnownLengths: {},
+      widgetPosition: this.getValidWidgetPosition(this.data.widgetPosition),
+      showPaneWidget: Boolean(this.data.showPaneWidget),
+      showStatusBarProgress: Boolean(this.data.showStatusBarProgress),
+    });
+    await this.saveProgress();
+    this.moveWidgetToActivePane();
+    this.updateUi();
+    new Notice("RPG levelling progress reset.");
+  }
+
   playLevelUpAnimation() {
     if (this.statusBar) {
-      this.statusBar.removeClass("rpg-levelling--level-up");
-      this.statusBar.offsetWidth;
-      this.statusBar.addClass("rpg-levelling--level-up");
+      if (this.data.showStatusBarProgress) {
+        this.statusBar.removeClass("rpg-levelling--level-up");
+        this.statusBar.offsetWidth;
+        this.statusBar.addClass("rpg-levelling--level-up");
+      }
     }
 
     if (this.hud) {
-      this.hud.removeClass("rpg-levelling-widget--level-up");
-      this.hud.offsetWidth;
-      this.hud.addClass("rpg-levelling-widget--level-up");
+      if (this.data.showPaneWidget) {
+        this.hud.removeClass("rpg-levelling-widget--level-up");
+        this.hud.offsetWidth;
+        this.hud.addClass("rpg-levelling-widget--level-up");
+      }
     }
 
     const burstHost = this.widgetHost || document.body;
     const burst = burstHost.createDiv({
-      cls: "rpg-levelling-burst",
+      cls: `rpg-levelling-burst rpg-levelling-burst--${this.getValidWidgetPosition(
+        this.data.widgetPosition
+      )}`,
       text: `Level ${this.data.level}`,
     });
 
@@ -442,5 +482,83 @@ class RpgLevellingSettingTab extends PluginSettingTab {
             await this.plugin.saveProgress();
           });
       });
+
+    new Setting(containerEl)
+      .setName("Show pane widget")
+      .setDesc("Show the floating XP widget in the focused editor pane.")
+      .addToggle((toggle) => {
+        toggle
+          .setValue(Boolean(this.plugin.data.showPaneWidget))
+          .onChange(async (value) => {
+            this.plugin.data.showPaneWidget = value;
+            this.plugin.moveWidgetToActivePane();
+            this.plugin.updateUi();
+            await this.plugin.saveProgress();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Show status bar progress")
+      .setDesc("Show level and XP progress in Obsidian's status bar.")
+      .addToggle((toggle) => {
+        toggle
+          .setValue(Boolean(this.plugin.data.showStatusBarProgress))
+          .onChange(async (value) => {
+            this.plugin.data.showStatusBarProgress = value;
+            this.plugin.updateUi();
+            await this.plugin.saveProgress();
+          });
+      });
+
+    new Setting(containerEl)
+      .setName("Reset level")
+      .setDesc("Reset level, XP, and typed character progress.")
+      .addButton((button) => {
+        button
+          .setButtonText("Reset level")
+          .onClick(() => {
+            new RpgLevellingResetModal(this.app, this.plugin).open();
+          });
+
+        button.buttonEl.addClass("rpg-levelling-danger-button");
+      });
+  }
+}
+
+class RpgLevellingResetModal extends Modal {
+  constructor(app, plugin) {
+    super(app);
+    this.plugin = plugin;
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.addClass("rpg-levelling-reset-modal");
+
+    contentEl.createEl("h2", { text: "Reset level?" });
+    contentEl.createEl("p", {
+      text: "This will reset your level, XP, and typed character progress.",
+    });
+
+    const actions = contentEl.createDiv({
+      cls: "rpg-levelling-reset-modal__actions",
+    });
+
+    const cancelButton = actions.createEl("button", { text: "Cancel" });
+    cancelButton.addEventListener("click", () => {
+      this.close();
+    });
+
+    const resetButton = actions.createEl("button", { text: "Reset level" });
+    resetButton.addClass("rpg-levelling-danger-button");
+    resetButton.addEventListener("click", async () => {
+      await this.plugin.resetProgress();
+      this.close();
+    });
+  }
+
+  onClose() {
+    this.contentEl.empty();
   }
 }

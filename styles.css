@@ -44,6 +44,10 @@
   animation: rpg-levelling-flash 900ms ease-out;
 }
 
+.rpg-levelling--hidden {
+  display: none;
+}
+
 .rpg-levelling-widget-host {
   position: relative;
 }
@@ -68,12 +72,12 @@
 }
 
 .rpg-levelling-widget--bottom-right {
-  bottom: 14px;
+  bottom: 34px;
   right: 14px;
 }
 
 .rpg-levelling-widget--bottom-left {
-  bottom: 14px;
+  bottom: 34px;
   left: 14px;
 }
 
@@ -138,7 +142,6 @@
   background: var(--background-primary);
   border: 1px solid var(--interactive-accent);
   border-radius: 8px;
-  bottom: 54px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   color: var(--text-normal);
   font-size: 12px;
@@ -147,8 +150,43 @@
   padding: 6px 10px;
   pointer-events: none;
   position: absolute;
-  right: 20px;
   z-index: 1000000;
+}
+
+.rpg-levelling-burst--bottom-right {
+  bottom: 74px;
+  right: 20px;
+}
+
+.rpg-levelling-burst--bottom-left {
+  bottom: 74px;
+  left: 20px;
+}
+
+.rpg-levelling-burst--top-right {
+  right: 20px;
+  top: 96px;
+}
+
+.rpg-levelling-burst--top-left {
+  left: 20px;
+  top: 96px;
+}
+
+.rpg-levelling-danger-button {
+  background-color: var(--background-modifier-error) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.rpg-levelling-danger-button:hover {
+  background-color: var(--text-error) !important;
+}
+
+.rpg-levelling-reset-modal__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 18px;
 }
 
 @keyframes rpg-levelling-widget-pop {
