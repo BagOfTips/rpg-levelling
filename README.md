@@ -2,6 +2,8 @@
 
 A small Obsidian plugin that adds RPG-style levelling progress to the active editor pane.
 
+<blockquote class="imgur-embed-pub" lang="en" data-id="a/vGjOPmp" data-context="false" ><a href="//imgur.com/a/vGjOPmp">Obsidian RPG Levelling</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
+
 ## What it does
 
 - Awards 1 XP for each character added while editing notes.
@@ -16,13 +18,3 @@ A small Obsidian plugin that adds RPG-style levelling progress to the active edi
 
 - `Show RPG levelling progress`
 - `Reset RPG levelling progress`
-
-## Install locally
-
-Place this folder inside your vault at:
-
-```text
-.obsidian/plugins/rpg-levelling
-```
-
-Then enable `RPG Levelling` from Obsidian's Community Plugins settings.
