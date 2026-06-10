@@ -173,13 +173,17 @@
   top: 96px;
 }
 
-.rpg-levelling-danger-button {
-  background-color: var(--background-modifier-error) !important;
-  color: var(--text-on-accent) !important;
+button.rpg-levelling-danger-button,
+.modal button.rpg-levelling-danger-button,
+.setting-item button.rpg-levelling-danger-button {
+  background-color: var(--background-modifier-error);
+  color: var(--text-on-accent);
 }
 
-.rpg-levelling-danger-button:hover {
-  background-color: var(--text-error) !important;
+button.rpg-levelling-danger-button:hover,
+.modal button.rpg-levelling-danger-button:hover,
+.setting-item button.rpg-levelling-danger-button:hover {
+  background-color: var(--text-error);
 }
 
 .rpg-levelling-reset-modal__actions {
