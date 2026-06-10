@@ -2,7 +2,7 @@
 
 A small Obsidian plugin that adds RPG-style levelling progress to the active editor pane.
 
-<blockquote class="imgur-embed-pub" lang="en" data-id="a/vGjOPmp" data-context="false" ><a href="//imgur.com/a/vGjOPmp">Obsidian RPG Levelling</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
+![Alt Text](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGl5emZybG83YTN0dzlwcTNubm0xM3dtMHNpb3RydmV2b3p0aDc1YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5ZnJhpJiu1foUfBlo1/giphy.gif)
 
 ## What it does
 
