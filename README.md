@@ -16,5 +16,4 @@ A small Obsidian plugin that adds RPG-style levelling progress to the active edi
 
 ## Commands
 
-- `Show RPG levelling progress`
-- `Reset RPG levelling progress`
+- `Toggle RPG levelling progress display`
